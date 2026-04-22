@@ -193,7 +193,7 @@ const TEAM = [
   { name:"Alex Johnston",       title:"Partner",                               type:"Owner",       W:"g", I:"g", D:"g", G:"c", E:"f", T:"f" },
   { name:"Amy Van Horn",        title:"Director, Marketing & Business Dev",    type:"Leadership",  W:"f", I:"f", D:"c", G:"g", E:"g", T:"c" },
   { name:"Briana Foley",        title:"Chief of Staff",                        type:"Leadership",  W:"f", I:"c", D:"g", G:"f", E:"c", T:"g" },
-  { name:"Caitlin Hannon",      title:"Partner",                               type:"Leadership",       W:"g", I:"g", D:"f", G:"c", E:"c", T:"f" },
+  { name:"Caitlin Hannon",      title:"Partner",                               type:["Owner","Leadership"], W:"g", I:"g", D:"f", G:"c", E:"c", T:"f" },
   { name:"Caroline Lutkewitte", title:"Strategic Support Lead",                type:"Team Member", W:"f", I:"c", D:"f", G:"c", E:"g", T:"g" },
   { name:"Cheri Coleman",       title:"Analyst",                               type:"Team Member", W:"g", I:"f", D:"c", G:"f", E:"g", T:"c" },
   { name:"Colin Vaida",         title:"Strategic Support Lead",                type:"Team Member", W:"c", I:"f", D:"g", G:"g", E:"c", T:"f" },
@@ -271,8 +271,11 @@ function bubble(v) {
 const TYPE_COLORS = { 'Owner':'#004966', 'Leadership':'#d16c12', 'Team Member':'#3a7db0' };
 
 function typeBadge(type) {
-  const color = TYPE_COLORS[type] || '#888';
-  return `<span style="padding:2px 10px;border-radius:999px;font-size:10px;font-weight:900;letter-spacing:.08em;text-transform:uppercase;background:${color}18;color:${color};border:1px solid ${color}30">${type}</span>`;
+  const types = Array.isArray(type) ? type : [type];
+  return types.map(t => {
+    const color = TYPE_COLORS[t] || '#888';
+    return `<span style="padding:2px 10px;border-radius:999px;font-size:10px;font-weight:900;letter-spacing:.08em;text-transform:uppercase;background:${color}18;color:${color};border:1px solid ${color}30;margin-right:4px">${t}</span>`;
+  }).join('');
 }
 
 /* ── Tab switching ───────────────────────────────────────────────────── */
@@ -365,7 +368,7 @@ function renderAnalysis(type) {
     return;
   }
 
-  const group     = TEAM.filter(p => p.type === type);
+  const group     = TEAM.filter(p => Array.isArray(p.type) ? p.type.includes(type) : p.type === type);
   const teamStats = computeStats(TEAM);
   const grpStats  = computeStats(group);
   if (!grpStats) { panel.style.display = 'none'; return; }
@@ -489,7 +492,7 @@ function setTitle(val) {
 function applyFilters() {
   const q = document.getElementById('searchInput').value.toLowerCase();
   let data = TEAM;
-  if (activeType  !== 'all') data = data.filter(p => p.type  === activeType);
+  if (activeType  !== 'all') data = data.filter(p => Array.isArray(p.type) ? p.type.includes(activeType) : p.type === activeType);
   if      (activeTitle === '__director__') data = data.filter(p => p.title.includes('Director'));
   else if (activeTitle === '__chief__')    data = data.filter(p => p.title.includes('Chief'));
   else if (activeTitle !== '')             data = data.filter(p => p.title === activeTitle);
