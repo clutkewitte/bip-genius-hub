@@ -1,0 +1,619 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>BIP Working Genius | Strategy Hub</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Lato:wght@300;400;700;900&display=swap" rel="stylesheet" />
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <style>
+    body { font-family: 'Lato', sans-serif; color: #434343; background: #f8fafc; }
+    .tab-content { display: none; }
+    .tab-content.active { display: block; }
+    .nav-btn { transition: all 0.2s; }
+    .nav-btn.active { background: #3a7db0 !important; color: #fff !important; box-shadow: 0 4px 12px rgba(58,125,176,0.3); }
+    .nav-btn:not(.active):hover { color: #3a7db0; }
+    .row-hover:hover { background: #f8fafc; }
+    .row-hover:hover td:first-child { color: #3a7db0; }
+    .active-filter-btn { background: #3a7db0 !important; color: #fff !important; border-color: #3a7db0 !important; }
+    .filter-type-btn, .filter-title-btn { cursor: pointer; background: #fff; }
+    ::-webkit-scrollbar { width: 6px; height: 6px; }
+    ::-webkit-scrollbar-track { background: #e6e8ea; }
+    ::-webkit-scrollbar-thumb { background: #888; border-radius: 3px; }
+  </style>
+</head>
+<body class="min-h-screen">
+
+  <!-- ── HEADER ─────────────────────────────────────────────────────── -->
+  <div class="max-w-7xl mx-auto px-6 md:px-12 py-10">
+
+    <header class="flex flex-col lg:flex-row justify-between items-start lg:items-center mb-12 gap-6">
+      <div class="flex items-center gap-4">
+        <img src="bip_logo.png" alt="BIP Logo" class="h-12 w-auto object-contain" />
+        <div class="h-10 w-px bg-slate-200"></div>
+        <div>
+          <p class="font-black uppercase tracking-tight text-xl" style="color:#004966">Building Impact Partners</p>
+          <p class="font-black uppercase tracking-tight" style="color:#3a7db0">Genius Strategy Hub</p>
+        </div>
+      </div>
+
+      <nav class="flex bg-white p-1.5 rounded-2xl shadow-sm border border-slate-100 gap-1">
+        <button onclick="showTab('heatmap')" id="btn-heatmap"
+          class="nav-btn active flex items-center gap-2 px-5 py-2.5 rounded-xl font-black text-xs uppercase tracking-wider text-slate-400">
+          <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path d="M3 3v18h18M18 17V9M13 17V5M8 17v-3"/></svg>
+          Heatmap
+        </button>
+        <button onclick="showTab('matrix')" id="btn-matrix"
+          class="nav-btn flex items-center gap-2 px-5 py-2.5 rounded-xl font-black text-xs uppercase tracking-wider text-slate-400">
+          <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></svg>
+          Matrix
+        </button>
+        <button onclick="showTab('values')" id="btn-values"
+          class="nav-btn flex items-center gap-2 px-5 py-2.5 rounded-xl font-black text-xs uppercase tracking-wider text-slate-400">
+          <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path d="M4.5 16.5c-1.5 1.26-2 5-2 5s3.74-.5 5-2c.71-.84.7-2.13-.09-2.91a2.18 2.18 0 00-2.91-.09zM12 15l-3-3a22 22 0 012-3.95A12.88 12.88 0 0122 2c0 2.72-.78 7.5-6 11a22.35 22.35 0 01-4 2z"/></svg>
+          Values
+        </button>
+      </nav>
+    </header>
+
+    <!-- ── TAB 1: HEATMAP ─────────────────────────────────────────────── -->
+    <div id="heatmap" class="tab-content active space-y-8">
+      <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+
+        <!-- Chart -->
+        <div class="lg:col-span-2 bg-white p-8 rounded-3xl shadow-sm border border-slate-100">
+          <h3 class="text-xl font-black uppercase mb-6" style="color:#3a7db0">Firm Energy Distribution</h3>
+          <div style="height:380px; position:relative">
+            <canvas id="heatmapChart"></canvas>
+          </div>
+        </div>
+
+        <!-- Insights + Stats -->
+        <div class="space-y-5">
+          <div class="p-7 rounded-3xl border-l-8" style="background:#f0f9f8; border-color:#3d897e">
+            <p class="font-black uppercase text-sm mb-2" style="color:#3d897e">Our Superpower</p>
+            <p class="text-sm text-slate-600 leading-relaxed">With 13 Geniuses in Discernment and 12 in Enablement, our team is great at refining ideas and helping each other succeed. We excel at making existing ideas better and providing the support needed to move work forward.</p>
+          </div>
+          <div class="p-7 rounded-3xl border-l-8" style="background:#fef2f2; border-color:#af412e">
+            <p class="font-black uppercase text-sm mb-2" style="color:#af412e">Our Blind Spot</p>
+            <p class="text-sm text-slate-600 leading-relaxed">Over 50% of the team (13 people) are frustrated by Wonder, and 12 are frustrated by Invention. While we are highly efficient, we risk solving the wrong problems because our collective energy favors "doing" over "dreaming."</p>
+          </div>
+          <div class="p-7 rounded-3xl border-l-8" style="background:#fff7ed; border-color:#d16c12">
+            <p class="font-black uppercase text-sm mb-2" style="color:#d16c12">Our Challenge</p>
+            <p class="text-sm text-slate-600 leading-relaxed">Energy is split at the bookends of a project: 8 people are frustrated by Galvanizing and 8 are frustrated by Tenacity. This means our projects are most likely to stall during the initial rally or the final push to the finish line.</p>
+          </div>
+          <div class="grid grid-cols-2 gap-3">
+            <div class="bg-white p-4 rounded-2xl border border-slate-100 shadow-sm border-t-4" style="border-top-color:#3a7db0">
+              <p class="text-[10px] font-black uppercase tracking-widest text-slate-400 mb-1">Team Size</p>
+              <p class="font-black text-lg text-slate-700">24 Members</p>
+            </div>
+            <div class="bg-white p-4 rounded-2xl border border-slate-100 shadow-sm border-t-4" style="border-top-color:#f2cf57">
+              <p class="text-[10px] font-black uppercase tracking-widest text-slate-400 mb-1">Year</p>
+              <p class="font-black text-lg text-slate-700">2026</p>
+            </div>
+            <div class="bg-white p-4 rounded-2xl border border-slate-100 shadow-sm border-t-4" style="border-top-color:#af412e">
+              <p class="text-[10px] font-black uppercase tracking-widest text-slate-400 mb-1">Greatest Drain</p>
+              <p class="font-black text-lg text-slate-700">Wonder</p>
+            </div>
+            <div class="bg-white p-4 rounded-2xl border border-slate-100 shadow-sm border-t-4" style="border-top-color:#3d897e">
+              <p class="text-[10px] font-black uppercase tracking-widest text-slate-400 mb-1">Top Genius</p>
+              <p class="font-black text-lg text-slate-700">Discernment</p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ── TAB 2: MATRIX ──────────────────────────────────────────────── -->
+    <div id="matrix" class="tab-content">
+      <div class="bg-white rounded-3xl shadow-sm border border-slate-100 overflow-hidden">
+
+        <!-- Header row: title + legend + search -->
+        <div class="p-8 border-b border-slate-100 flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
+          <div>
+            <h3 class="text-xl font-black uppercase" style="color:#3a7db0">Team Assessment Matrix</h3>
+            <div class="flex items-center gap-5 mt-2 text-[10px] font-black uppercase tracking-widest text-slate-400">
+              <span class="flex items-center gap-1.5"><span class="w-3 h-3 rounded-full inline-block" style="background:#3d897e"></span>Genius</span>
+              <span class="flex items-center gap-1.5"><span class="w-3 h-3 rounded-full inline-block" style="background:#f2cf57"></span>Competency</span>
+              <span class="flex items-center gap-1.5"><span class="w-3 h-3 rounded-full inline-block" style="background:#af412e"></span>Frustration</span>
+            </div>
+          </div>
+          <div class="relative">
+            <svg class="w-4 h-4 text-slate-400 absolute left-3 top-1/2 -translate-y-1/2" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/></svg>
+            <input id="searchInput" type="text" placeholder="Search by name..."
+              oninput="applyFilters()"
+              class="pl-10 pr-4 py-2 bg-slate-50 border border-slate-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-blue-300" />
+          </div>
+        </div>
+
+        <!-- Filter bar -->
+        <div class="px-8 py-5 border-b border-slate-100 flex flex-col gap-4">
+
+          <!-- Role Type pills -->
+          <div class="flex flex-wrap items-center gap-2">
+            <span class="text-[10px] font-black uppercase tracking-widest text-slate-400 mr-1">Role Type</span>
+            <button onclick="setType('all')"          id="type-all"         class="filter-type-btn active-filter-btn px-4 py-1.5 rounded-full text-xs font-black uppercase tracking-wide border transition-all">All</button>
+            <button onclick="setType('Owner')"        id="type-Owner"       class="filter-type-btn px-4 py-1.5 rounded-full text-xs font-black uppercase tracking-wide border border-slate-200 text-slate-500 transition-all hover:border-[#004966] hover:text-[#004966]">Owner</button>
+            <button onclick="setType('Leadership')"   id="type-Leadership"  class="filter-type-btn px-4 py-1.5 rounded-full text-xs font-black uppercase tracking-wide border border-slate-200 text-slate-500 transition-all hover:border-[#d16c12] hover:text-[#d16c12]">Leadership</button>
+            <button onclick="setType('Team Member')"  id="type-Team Member" class="filter-type-btn px-4 py-1.5 rounded-full text-xs font-black uppercase tracking-wide border border-slate-200 text-slate-500 transition-all hover:border-[#3a7db0] hover:text-[#3a7db0]">Team Member</button>
+          </div>
+
+          <!-- Role Title pills -->
+          <div class="flex flex-wrap items-center gap-2">
+            <span class="text-[10px] font-black uppercase tracking-widest text-slate-400 mr-1">Title</span>
+            <button onclick="setTitle('')" id="title-all" class="filter-title-btn active-filter-btn px-4 py-1.5 rounded-full text-xs font-black uppercase tracking-wide border transition-all">All</button>
+            <div id="titlePills" class="flex flex-wrap gap-2"></div>
+          </div>
+        </div>
+
+        <!-- Analysis panel (shown when a Role Type is active) -->
+        <div id="analysisPanel" style="display:none" class="border-b border-slate-100"></div>
+
+        <!-- Table -->
+        <div class="overflow-x-auto">
+          <table class="w-full text-left">
+            <thead>
+              <tr class="bg-slate-50 text-[11px] font-black uppercase tracking-widest text-slate-400 border-b border-slate-100">
+                <th class="px-8 py-5">Team Member</th>
+                <th class="px-4 py-5">Title</th>
+                <th class="px-4 py-5">Type</th>
+                <th class="px-4 py-5 text-center">W</th>
+                <th class="px-4 py-5 text-center">I</th>
+                <th class="px-4 py-5 text-center">D</th>
+                <th class="px-4 py-5 text-center">G</th>
+                <th class="px-4 py-5 text-center">E</th>
+                <th class="px-4 py-5 text-center">T</th>
+              </tr>
+            </thead>
+            <tbody id="matrixBody" class="divide-y divide-slate-50"></tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+    <!-- ── TAB 3: VALUES ──────────────────────────────────────────────── -->
+    <div id="values" class="tab-content">
+      <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8" id="valuesGrid"></div>
+    </div>
+
+    <!-- ── FOOTER ─────────────────────────────────────────────────────── -->
+    <footer class="mt-20 pt-8 border-t border-slate-200 flex flex-col md:flex-row justify-between items-center gap-2 text-[10px] font-black uppercase tracking-[0.25em] text-slate-400">
+      <span>Building Impact Partners © 2026</span>
+      <span class="italic font-light normal-case tracking-normal">The New Chapter · Team Retreat</span>
+      <span class="px-3 py-1 bg-slate-100 rounded">Strictly Confidential</span>
+    </footer>
+  </div>
+
+<script>
+/* ── Data ────────────────────────────────────────────────────────────── */
+const TEAM = [
+  { name:"Alex Johnston",       title:"Partner",                               type:"Owner",       W:"g", I:"g", D:"g", G:"c", E:"f", T:"f" },
+  { name:"Amy Van Horn",        title:"Director, Marketing & Business Dev",    type:"Leadership",  W:"f", I:"f", D:"c", G:"g", E:"g", T:"c" },
+  { name:"Briana Foley",        title:"Chief of Staff",                        type:"Leadership",  W:"f", I:"c", D:"g", G:"f", E:"c", T:"g" },
+  { name:"Caitlin Hannon",      title:"Partner",                               type:"Leadership",       W:"g", I:"g", D:"f", G:"c", E:"c", T:"f" },
+  { name:"Caroline Lutkewitte", title:"Strategic Support Lead",                type:"Team Member", W:"f", I:"c", D:"f", G:"c", E:"g", T:"g" },
+  { name:"Cheri Coleman",       title:"Analyst",                               type:"Team Member", W:"g", I:"f", D:"c", G:"f", E:"g", T:"c" },
+  { name:"Colin Vaida",         title:"Strategic Support Lead",                type:"Team Member", W:"c", I:"f", D:"g", G:"g", E:"c", T:"f" },
+  { name:"Darryl Willie",       title:"Principal",                             type:"Team Member", W:"f", I:"c", D:"g", G:"c", E:"g", T:"f" },
+  { name:"Deneice Frazier",     title:"Associate",                             type:"Team Member", W:"f", I:"f", D:"c", G:"c", E:"g", T:"g" },
+  { name:"Erin Olson",          title:"Operations Manager",                    type:"Team Member", W:"f", I:"f", D:"c", G:"c", E:"g", T:"g" },
+  { name:"Erin Watts",          title:"Director, Evaluation & Effectiveness",  type:"Leadership",  W:null, I:null, D:null, G:null, E:null, T:null },
+  { name:"Haley Pilgrim",       title:"Associate",                             type:"Team Member", W:"f", I:"f", D:"g", G:"g", E:"c", T:"c" },
+  { name:"Irene Chen",          title:"Associate",                             type:"Team Member", W:"f", I:"f", D:"c", G:"c", E:"g", T:"g" },
+  { name:"Jack Hill",           title:"Associate",                             type:"Team Member", W:"c", I:"g", D:"g", G:"f", E:"c", T:"f" },
+  { name:"Latricia Barksdale",  title:"Chief Operating Officer",               type:"Leadership",  W:"g", I:"c", D:"g", G:"f", E:"f", T:"c" },
+  { name:"Maria Rosa",          title:"Strategic Support Lead",                type:"Team Member", W:"f", I:"f", D:"c", G:"g", E:"g", T:"c" },
+  { name:"Mike Wang",           title:"Partner",                               type:"Owner",       W:"f", I:"c", D:"g", G:"g", E:"f", T:"c" },
+  { name:"My Bui",              title:"Analyst",                               type:"Team Member", W:"c", I:"c", D:"g", G:"f", E:"g", T:"f" },
+  { name:"Natalie Vieira",      title:"Strategic Support Lead",                type:"Team Member", W:"c", I:"g", D:"g", G:"f", E:"c", T:"f" },
+  { name:"Neha Shingane",       title:"Analyst",                               type:"Team Member", W:"f", I:"g", D:"c", G:"c", E:"g", T:"f" },
+  { name:"Nicole Brisbane",     title:"Partner",                               type:"Owner",       W:"f", I:"f", D:"g", G:"g", E:"c", T:"c" },
+  { name:"Paul Holzer",         title:"Principal",                             type:"Team Member", W:"f", I:"f", D:"g", G:"c", E:"g", T:"c" },
+  { name:"Stanley Azuakola",    title:"Analyst",                               type:"Team Member", W:"c", I:"f", D:"g", G:"c", E:"f", T:"g" },
+  { name:"Tanis Klingler",      title:"Associate",                             type:"Team Member", W:"f", I:"f", D:"c", G:"c", E:"g", T:"g" }
+];
+
+const CATS = [
+  { id:'W', label:'Wonder'      },
+  { id:'I', label:'Invention'   },
+  { id:'D', label:'Discernment' },
+  { id:'G', label:'Galvanizing' },
+  { id:'E', label:'Enablement'  },
+  { id:'T', label:'Tenacity'    }
+];
+
+const VALUES_DATA = [
+  {
+    title: "Entrepreneurial",
+    desc:  "We push through fears to ask hard questions, seek evidence, and take action.",
+    color: "#004966",
+    cats:  ['W','I']
+  },
+  {
+    title: "Purposeful",
+    desc:  "We pursue transformational, systemic change and know that the path to get there requires innovation, persistence, and pragmatism.",
+    color: "#d16c12",
+    cats:  ['D','T']
+  },
+  {
+    title: "Equity-Minded",
+    desc:  "We find creative avenues to help philanthropists play a more active role advancing equity and opportunity for real people, right now.",
+    color: "#3d897e",
+    cats:  ['G']
+  },
+  {
+    title: "Growth-Oriented",
+    desc:  "We commit to our own constant growth and the growth of others as a key aspect of deepening our impact.",
+    color: "#3d897e",
+    cats:  ['E']
+  },
+  {
+    title: "Relational",
+    desc:  "We embrace the humanity of our teammates, our clients, and their partners by offering empathy and understanding while holding each other accountable to be our best selves.",
+    color: "#3a7db0",
+    cats:  ['G','E']
+  }
+];
+
+/* ── Helpers ─────────────────────────────────────────────────────────── */
+function bubbleColor(v) {
+  return v === 'g' ? '#3d897e' : v === 'c' ? '#f2cf57' : '#af412e';
+}
+
+function bubble(v) {
+  if (v === null) return `<div style="width:18px;height:18px;border-radius:50%;background:#e2e8f0;margin:0 auto;" title="No assessment data"></div>`;
+  return `<div style="width:18px;height:18px;border-radius:50%;background:${bubbleColor(v)};margin:0 auto;box-shadow:inset 0 1px 3px rgba(0,0,0,.15)"></div>`;
+}
+
+const TYPE_COLORS = { 'Owner':'#004966', 'Leadership':'#d16c12', 'Team Member':'#3a7db0' };
+
+function typeBadge(type) {
+  const color = TYPE_COLORS[type] || '#888';
+  return `<span style="padding:2px 10px;border-radius:999px;font-size:10px;font-weight:900;letter-spacing:.08em;text-transform:uppercase;background:${color}18;color:${color};border:1px solid ${color}30">${type}</span>`;
+}
+
+/* ── Tab switching ───────────────────────────────────────────────────── */
+function showTab(id) {
+  document.querySelectorAll('.tab-content').forEach(el => el.classList.remove('active'));
+  document.querySelectorAll('.nav-btn').forEach(el => el.classList.remove('active'));
+  document.getElementById(id).classList.add('active');
+  document.getElementById('btn-' + id).classList.add('active');
+  if (id === 'heatmap') renderChart();
+}
+
+/* ── Analysis ────────────────────────────────────────────────────────── */
+function computeStats(data) {
+  const d = data.filter(p => p.W !== null); // exclude no-assessment members
+  const n = d.length;
+  if (n === 0) return null;
+  return { n, cats: CATS.map(cat => ({
+    id:    cat.id,
+    label: cat.label,
+    gPct:  Math.round(d.filter(p => p[cat.id] === 'g').length / n * 100),
+    cPct:  Math.round(d.filter(p => p[cat.id] === 'c').length / n * 100),
+    fPct:  Math.round(d.filter(p => p[cat.id] === 'f').length / n * 100),
+    gN:    d.filter(p => p[cat.id] === 'g').length,
+    fN:    d.filter(p => p[cat.id] === 'f').length,
+  }))};
+}
+
+function renderAnalysis(type) {
+  const panel = document.getElementById('analysisPanel');
+
+  if (type === 'all') {
+    const s = computeStats(TEAM);
+    const topGenius = [...s.cats].sort((a,b) => b.gPct - a.gPct)[0];
+    const topGap    = [...s.cats].sort((a,b) => b.fPct - a.fPct)[0];
+    const topComp   = [...s.cats].sort((a,b) => b.cPct - a.cPct)[0];
+    const mostBal   = [...s.cats].sort((a,b) => Math.abs(a.gPct-a.fPct) - Math.abs(b.gPct-b.fPct))[0];
+
+    const triBar = (gPct, cPct, fPct) => `
+      <div style="display:flex;height:8px;border-radius:4px;overflow:hidden;gap:1px">
+        <div style="flex:${gPct};background:#3d897e;border-radius:4px 0 0 4px"></div>
+        <div style="flex:${cPct};background:#f2cf57"></div>
+        <div style="flex:${fPct};background:#af412e;border-radius:0 4px 4px 0"></div>
+      </div>`;
+
+    const catCards = s.cats.map(d => `
+      <div style="flex:1;min-width:90px">
+        <div style="display:flex;justify-content:space-between;align-items:baseline;margin-bottom:5px">
+          <span style="font-size:10px;font-weight:900;text-transform:uppercase;letter-spacing:.08em;color:#64748b">${d.label}</span>
+          <span style="font-size:12px;font-weight:900;color:#3d897e">${d.gPct}%</span>
+        </div>
+        ${triBar(d.gPct, d.cPct, d.fPct)}
+        <div style="font-size:9px;color:#94a3b8;margin-top:4px;text-align:right">${d.gN} genius</div>
+      </div>`).join('');
+
+    panel.style.display = 'block';
+    panel.innerHTML = `
+      <div style="padding:28px 32px;background:#3a7db008;border-left:5px solid #3a7db0">
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px;flex-wrap:wrap;gap:8px">
+          <span style="font-size:11px;font-weight:900;text-transform:uppercase;letter-spacing:.15em;color:#3a7db0">Full Team Analysis</span>
+          <div style="display:flex;gap:14px;font-size:9px;font-weight:900;text-transform:uppercase;letter-spacing:.1em;color:#94a3b8">
+            <span><span style="display:inline-block;width:8px;height:8px;border-radius:2px;background:#3d897e;margin-right:4px"></span>Genius</span>
+            <span><span style="display:inline-block;width:8px;height:8px;border-radius:2px;background:#f2cf57;margin-right:4px"></span>Competency</span>
+            <span><span style="display:inline-block;width:8px;height:8px;border-radius:2px;background:#af412e;margin-right:4px"></span>Frustration</span>
+          </div>
+        </div>
+        <div style="display:flex;gap:16px;flex-wrap:wrap;margin-bottom:20px">${catCards}</div>
+        <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:12px">
+          <div style="background:#fff;border-radius:14px;padding:14px 18px;border:1px solid #3d897e20">
+            <p style="font-size:9px;font-weight:900;text-transform:uppercase;letter-spacing:.12em;color:#3d897e;margin-bottom:4px">Top Genius</p>
+            <p style="font-size:14px;font-weight:900;color:#1e293b">${topGenius.label} <span style="font-size:12px;color:#3d897e">${topGenius.gPct}%</span></p>
+            <p style="font-size:11px;color:#64748b;margin-top:2px">${topGenius.gN} of ${s.n} members</p>
+          </div>
+          <div style="background:#fff;border-radius:14px;padding:14px 18px;border:1px solid #af412e20">
+            <p style="font-size:9px;font-weight:900;text-transform:uppercase;letter-spacing:.12em;color:#af412e;margin-bottom:4px">Biggest Drain</p>
+            <p style="font-size:14px;font-weight:900;color:#1e293b">${topGap.label} <span style="font-size:12px;color:#af412e">${topGap.fPct}%</span></p>
+            <p style="font-size:11px;color:#64748b;margin-top:2px">${topGap.fN} of ${s.n} frustrated</p>
+          </div>
+          <div style="background:#fff;border-radius:14px;padding:14px 18px;border:1px solid #f2cf5740">
+            <p style="font-size:9px;font-weight:900;text-transform:uppercase;letter-spacing:.12em;color:#888;margin-bottom:4px">Most Competency</p>
+            <p style="font-size:14px;font-weight:900;color:#1e293b">${topComp.label} <span style="font-size:12px;color:#888">${topComp.cPct}%</span></p>
+            <p style="font-size:11px;color:#64748b;margin-top:2px">${topComp.n || ''} reliable but not energizing for many</p>
+          </div>
+          <div style="background:#fff;border-radius:14px;padding:14px 18px;border:1px solid #3a7db020">
+            <p style="font-size:9px;font-weight:900;text-transform:uppercase;letter-spacing:.12em;color:#3a7db0;margin-bottom:4px">Most Balanced</p>
+            <p style="font-size:14px;font-weight:900;color:#1e293b">${mostBal.label}</p>
+            <p style="font-size:11px;color:#64748b;margin-top:2px">${mostBal.gPct}% genius · ${mostBal.fPct}% frustration</p>
+          </div>
+        </div>
+      </div>`;
+    return;
+  }
+
+  const group     = TEAM.filter(p => p.type === type);
+  const teamStats = computeStats(TEAM);
+  const grpStats  = computeStats(group);
+  if (!grpStats) { panel.style.display = 'none'; return; }
+
+  const color = TYPE_COLORS[type] || '#3a7db0';
+  const smallSample = grpStats.n <= 4;
+
+  // Sort to find top strength and biggest gap vs full team
+  const diffs = grpStats.cats.map((cat, i) => ({
+    ...cat,
+    teamGPct: teamStats.cats[i].gPct,
+    teamFPct: teamStats.cats[i].fPct,
+    gDiff: cat.gPct - teamStats.cats[i].gPct,
+    fDiff: cat.fPct - teamStats.cats[i].fPct,
+  }));
+
+  const topGenius  = [...diffs].sort((a,b) => b.gPct - a.gPct)[0];
+  const topGap     = [...diffs].sort((a,b) => b.fPct - a.fPct)[0];
+  const mostAbove  = [...diffs].sort((a,b) => b.gDiff - a.gDiff)[0];
+  const mostBelow  = [...diffs].sort((a,b) => a.gDiff - b.gDiff)[0];
+
+  const sign = v => v > 0 ? `+${v}` : `${v}`;
+  const pctBar = (grpPct, teamPct) => {
+    const teamMarkerLeft = Math.min(teamPct, 100);
+    return `
+      <div style="position:relative;height:8px;background:#f1f5f9;border-radius:4px;overflow:visible">
+        <div style="height:100%;width:${grpPct}%;background:${color};border-radius:4px;transition:width .4s"></div>
+        <div title="Team avg: ${teamPct}%" style="position:absolute;top:-3px;left:${teamMarkerLeft}%;transform:translateX(-50%);width:2px;height:14px;background:#94a3b8;border-radius:2px"></div>
+      </div>`;
+  };
+
+  const catCards = diffs.map(d => `
+    <div style="flex:1;min-width:90px">
+      <div style="display:flex;justify-content:space-between;align-items:baseline;margin-bottom:5px">
+        <span style="font-size:10px;font-weight:900;text-transform:uppercase;letter-spacing:.08em;color:#64748b">${d.label}</span>
+        <span style="font-size:12px;font-weight:900;color:${color}">${d.gPct}%</span>
+      </div>
+      ${pctBar(d.gPct, d.teamGPct)}
+      <div style="font-size:9px;color:#94a3b8;margin-top:4px;text-align:right">${sign(d.gDiff)}pp vs team</div>
+    </div>`).join('');
+
+  panel.style.display = 'block';
+  panel.innerHTML = `
+    <div style="padding:28px 32px;background:${color}08;border-left:5px solid ${color}">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px;flex-wrap:wrap;gap:8px">
+        <div>
+          <span style="font-size:11px;font-weight:900;text-transform:uppercase;letter-spacing:.15em;color:${color}">
+            ${type} Analysis
+          </span>
+          <span style="font-size:11px;color:#94a3b8;margin-left:8px">${grpStats.n} member${grpStats.n!==1?'s':''} with assessment data</span>
+          ${smallSample ? `<span style="margin-left:8px;padding:2px 8px;background:#fef3c7;color:#92400e;font-size:9px;font-weight:900;text-transform:uppercase;border-radius:999px">Small sample</span>` : ''}
+        </div>
+        <div style="font-size:9px;color:#94a3b8;font-weight:700;text-transform:uppercase;letter-spacing:.1em">
+          Bar = group · Line = team avg
+        </div>
+      </div>
+
+      <!-- Per-category bars -->
+      <div style="display:flex;gap:16px;flex-wrap:wrap;margin-bottom:20px">
+        ${catCards}
+      </div>
+
+      <!-- Insight callouts -->
+      <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:12px">
+        <div style="background:#fff;border-radius:14px;padding:14px 18px;border:1px solid ${color}20">
+          <p style="font-size:9px;font-weight:900;text-transform:uppercase;letter-spacing:.12em;color:${color};margin-bottom:4px">Top Genius</p>
+          <p style="font-size:14px;font-weight:900;color:#1e293b">${topGenius.label} <span style="font-size:12px;color:${color}">${topGenius.gPct}%</span></p>
+          <p style="font-size:11px;color:#64748b;margin-top:2px">${topGenius.gN} of ${grpStats.n} in this group · ${sign(topGenius.gDiff)}pp vs team avg</p>
+        </div>
+        <div style="background:#fff;border-radius:14px;padding:14px 18px;border:1px solid #af412e20">
+          <p style="font-size:9px;font-weight:900;text-transform:uppercase;letter-spacing:.12em;color:#af412e;margin-bottom:4px">Biggest Drain</p>
+          <p style="font-size:14px;font-weight:900;color:#1e293b">${topGap.label} <span style="font-size:12px;color:#af412e">${topGap.fPct}%</span></p>
+          <p style="font-size:11px;color:#64748b;margin-top:2px">${topGap.fN} of ${grpStats.n} frustrated · ${sign(topGap.fDiff)}pp vs team avg</p>
+        </div>
+        <div style="background:#fff;border-radius:14px;padding:14px 18px;border:1px solid #3d897e20">
+          <p style="font-size:9px;font-weight:900;text-transform:uppercase;letter-spacing:.12em;color:#3d897e;margin-bottom:4px">Most Above Team Avg</p>
+          <p style="font-size:14px;font-weight:900;color:#1e293b">${mostAbove.label} <span style="font-size:12px;color:#3d897e">${sign(mostAbove.gDiff)}pp</span></p>
+          <p style="font-size:11px;color:#64748b;margin-top:2px">Group: ${mostAbove.gPct}% genius vs team: ${mostAbove.teamGPct}%</p>
+        </div>
+        <div style="background:#fff;border-radius:14px;padding:14px 18px;border:1px solid #f2cf5740">
+          <p style="font-size:9px;font-weight:900;text-transform:uppercase;letter-spacing:.12em;color:#888;margin-bottom:4px">Most Below Team Avg</p>
+          <p style="font-size:14px;font-weight:900;color:#1e293b">${mostBelow.label} <span style="font-size:12px;color:#888">${sign(mostBelow.gDiff)}pp</span></p>
+          <p style="font-size:11px;color:#64748b;margin-top:2px">Group: ${mostBelow.gPct}% genius vs team: ${mostBelow.teamGPct}%</p>
+        </div>
+      </div>
+    </div>`;
+}
+
+/* ── Filter state ────────────────────────────────────────────────────── */
+let activeType  = 'all';
+let activeTitle = '';
+
+function setType(val) {
+  activeType  = val;
+  activeTitle = '';
+  document.querySelectorAll('.filter-type-btn').forEach(b => b.classList.remove('active-filter-btn'));
+  document.getElementById('type-' + val).classList.add('active-filter-btn');
+  // Reset title pills to All
+  document.querySelectorAll('.filter-title-btn').forEach(b => b.classList.remove('active-filter-btn'));
+  document.getElementById('title-all').classList.add('active-filter-btn');
+  applyFilters();
+  renderAnalysis(val);
+}
+
+function setTitle(val) {
+  activeTitle = val;
+  activeType  = 'all';
+  document.querySelectorAll('.filter-title-btn').forEach(b => b.classList.remove('active-filter-btn'));
+  const id = val === '' ? 'title-all' : (val === '__director__' || val === '__chief__') ? 'title-' + val : 'title-' + val.replace(/[^a-zA-Z0-9]/g, '_');
+  const el = document.getElementById(id);
+  if (el) el.classList.add('active-filter-btn');
+  // Reset type pills to All
+  document.querySelectorAll('.filter-type-btn').forEach(b => b.classList.remove('active-filter-btn'));
+  document.getElementById('type-all').classList.add('active-filter-btn');
+  applyFilters();
+  // Show full-team analysis when clearing title, hide when a title is active
+  if (val === '') renderAnalysis('all');
+  else document.getElementById('analysisPanel').style.display = 'none';
+}
+
+function applyFilters() {
+  const q = document.getElementById('searchInput').value.toLowerCase();
+  let data = TEAM;
+  if (activeType  !== 'all') data = data.filter(p => p.type  === activeType);
+  if      (activeTitle === '__director__') data = data.filter(p => p.title.includes('Director'));
+  else if (activeTitle === '__chief__')    data = data.filter(p => p.title.includes('Chief'));
+  else if (activeTitle !== '')             data = data.filter(p => p.title === activeTitle);
+  if (q)                     data = data.filter(p => p.name.toLowerCase().includes(q));
+  renderMatrix(data);
+}
+
+/* ── Matrix ──────────────────────────────────────────────────────────── */
+function renderMatrix(data) {
+  const tbody = document.getElementById('matrixBody');
+  tbody.innerHTML = data.map(p => `
+    <tr class="row-hover transition-colors">
+      <td class="px-8 py-4 font-bold text-slate-700 transition-colors whitespace-nowrap">${p.name}</td>
+      <td class="px-4 py-4 text-xs text-slate-500 font-bold whitespace-nowrap">${p.title}</td>
+      <td class="px-4 py-4 whitespace-nowrap">${typeBadge(p.type)}</td>
+      ${CATS.map(c => `<td class="px-4 py-4">${bubble(p[c.id])}</td>`).join('')}
+    </tr>
+  `).join('');
+}
+
+/* ── Build title pills from unique titles in data ────────────────────── */
+function buildTitlePills() {
+  // Deduplicate long Director titles into one grouped pill
+  const titles = [...new Set(TEAM.map(p => p.title))]
+    .filter(t => !t.includes('Director') && !t.includes('Chief'))
+    .sort();
+
+  const container = document.getElementById('titlePills');
+
+  const directorBtn = `<button id="title-__director__" onclick="setTitle('__director__')"
+    class="filter-title-btn px-4 py-1.5 rounded-full text-xs font-black uppercase tracking-wide border border-slate-200 text-slate-500 transition-all hover:border-[#3a7db0] hover:text-[#3a7db0]">
+    Director
+  </button>`;
+
+  const chiefBtn = `<button id="title-__chief__" onclick="setTitle('__chief__')"
+    class="filter-title-btn px-4 py-1.5 rounded-full text-xs font-black uppercase tracking-wide border border-slate-200 text-slate-500 transition-all hover:border-[#3a7db0] hover:text-[#3a7db0]">
+    Chief
+  </button>`;
+
+  const otherBtns = titles.map(t => {
+    const safeId = 'title-' + t.replace(/[^a-zA-Z0-9]/g, '_');
+    return `<button id="${safeId}" onclick="setTitle('${t.replace(/'/g,"\\\'")}')"
+      class="filter-title-btn px-4 py-1.5 rounded-full text-xs font-black uppercase tracking-wide border border-slate-200 text-slate-500 transition-all hover:border-[#3a7db0] hover:text-[#3a7db0]">
+      ${t}
+    </button>`;
+  }).join('');
+
+  container.innerHTML = directorBtn + chiefBtn + otherBtns;
+}
+
+/* ── Values ──────────────────────────────────────────────────────────── */
+function renderValues() {
+  const grid = document.getElementById('valuesGrid');
+  grid.innerHTML = VALUES_DATA.map(v => {
+    const slotsHtml = v.cats.map(cid => {
+      const cat = CATS.find(c => c.id === cid);
+      const names = TEAM.filter(p => p[cid] === 'g').map(p =>
+        `<span style="padding:3px 10px;background:#fff;border:1px solid #e2e8f0;border-radius:8px;font-size:11px;font-weight:700;color:#475569">${p.name.split(' ')[0]}</span>`
+      ).join('');
+      return `
+        <div style="background:#f8fafc;padding:14px;border-radius:16px;border:1px solid #e2e8f0">
+          <p style="font-size:10px;font-weight:900;letter-spacing:.15em;text-transform:uppercase;color:#94a3b8;margin-bottom:10px">${cat.label}</p>
+          <div style="display:flex;flex-wrap:wrap;gap:6px">${names}</div>
+        </div>`;
+    }).join('');
+
+    return `
+      <div style="background:#fff;padding:32px;border-radius:24px;border:1px solid #f1f5f9;border-top:8px solid ${v.color};box-shadow:0 1px 3px rgba(0,0,0,.06);display:flex;flex-direction:column">
+        <h4 style="font-size:18px;font-weight:900;text-transform:uppercase;color:#1e293b;margin-bottom:10px">${v.title}</h4>
+        <p style="font-size:12px;color:#64748b;line-height:1.7;margin-bottom:20px;flex-grow:1">${v.desc}</p>
+        <div style="display:flex;flex-direction:column;gap:12px">${slotsHtml}</div>
+      </div>`;
+  }).join('');
+}
+
+/* ── Chart ───────────────────────────────────────────────────────────── */
+let chartInstance = null;
+function renderChart() {
+  const counts = CATS.map(cat => ({
+    label: cat.label,
+    g: TEAM.filter(p => p[cat.id] === 'g').length,
+    c: TEAM.filter(p => p[cat.id] === 'c').length,
+    f: TEAM.filter(p => p[cat.id] === 'f').length
+  }));
+
+  const ctx = document.getElementById('heatmapChart').getContext('2d');
+  if (chartInstance) chartInstance.destroy();
+
+  chartInstance = new Chart(ctx, {
+    type: 'bar',
+    data: {
+      labels: counts.map(d => d.label),
+      datasets: [
+        { label: 'Genius',       data: counts.map(d => d.g), backgroundColor: '#3d897e', borderRadius: 0 },
+        { label: 'Competency',   data: counts.map(d => d.c), backgroundColor: '#f2cf57', borderRadius: 0 },
+        { label: 'Frustration',  data: counts.map(d => d.f), backgroundColor: '#af412e',
+          borderRadius: { topLeft:6, topRight:6, bottomLeft:0, bottomRight:0 } }
+      ]
+    },
+    options: {
+      responsive: true,
+      maintainAspectRatio: false,
+      scales: {
+        x: { stacked: true, grid: { display: false },
+             ticks: { font: { family:'Lato', weight:'900', size:12 }, color:'#434343' } },
+        y: { stacked: true, grid: { color:'#f1f5f9' },
+             ticks: { font: { family:'Lato' }, color:'#888' } }
+      },
+      plugins: {
+        legend: { position:'bottom', labels: { font: { family:'Lato', weight:'700' }, usePointStyle:true, pointStyle:'circle', padding:20 } },
+        tooltip: { titleFont:{ family:'Lato', weight:'900' }, bodyFont:{ family:'Lato' } }
+      }
+    }
+  });
+}
+
+/* ── Init ────────────────────────────────────────────────────────────── */
+window.addEventListener('DOMContentLoaded', () => {
+  buildTitlePills();
+  renderMatrix(TEAM);
+  renderValues();
+  renderChart();
+  renderAnalysis('all');
+});
+</script>
+</body>
+</html>
